@@ -63,24 +63,51 @@
       become: yes
       tags: dasel
 
+    - name: Install rust
+      ansible.builtin.shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      args:
+        creates: ~/.cargo/bin/rustup
+      tags: rust
+
+    - name: Install ripgrep
+      ansible.builtin.package:
+        name: ripgrep
+        state: present
+      tags: ripgrep
+
     - name: Install neovim
       ansible.builtin.shell: |
         wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
         wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz.sha256sum
         echo "$(cat nvim-linux64.tar.gz.sha256sum)" | sha256sum --check
-        if [ $? -ne 0 ]; then
-          exit 1
-        fi
         tar -zxvf nvim-linux64.tar.gz
         mv nvim-linux64 /opt/nvim
         rm nvim-linux64.tar.gz
         nvim-linux64.tar.gz.sha256sum
-        install -o root -g root -m 0755 -T /opt/nvim/bin/nvim /usr/local/bin/nvim
+        echo 'export PATH=/opt/nvim/bin:$PATH' >> ~/.bashrc
       become: yes
       args:
-        creates: /usr/local/bin/nvim
+        creates: /opt/nvim/bin/nvim
       tags: vim
 
+    - name: Install lvim
+      ansible.builtin.shell: |
+        which git
+        which make
+        which pip
+        which npm
+        which node
+        which cargo
+        which rg
+        yes | curl -s https://raw.githubusercontent.com/LunarVim/LunarVim/release-1.4/neovim-0.9/utils/installer/install.sh |  LV_BRANCH=release-1.4/neovim-0.9 bash 
+      args:
+        creates: ~/.local/bin/lvim
+      tags: lvim
+
+    - name: Uninstall lvim
+      ansible.builtin.shell: bash ~/.local/share/lunarvim/lvim/utils/installer/uninstall.sh 
+      when: "'cleanup-lvim' in ansible_run_tags"
+      tags: cleanup-lvim
 
     - name: Install kubectl and krew
       ansible.builtin.shell: |
