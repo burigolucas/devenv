@@ -83,6 +83,13 @@
       become: yes
       tags: make
 
+    - name: Install gcc
+      ansible.builtin.package:
+        name: gcc
+        state: present
+      become: yes
+      tags: gcc
+
     - name: Install meld
       ansible.builtin.package:
         name: meld
