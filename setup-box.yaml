@@ -73,7 +73,22 @@
       ansible.builtin.package:
         name: ripgrep
         state: present
+      become: yes
       tags: ripgrep
+
+    - name: Install make
+      ansible.builtin.package:
+        name: make
+        state: present
+      become: yes
+      tags: make
+
+    - name: Install meld
+      ansible.builtin.package:
+        name: meld
+        state: present
+      become: yes
+      tags: meld
 
     - name: Install neovim
       ansible.builtin.shell: |
@@ -81,17 +96,17 @@
         wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz.sha256sum
         echo "$(cat nvim-linux64.tar.gz.sha256sum)" | sha256sum --check
         tar -zxvf nvim-linux64.tar.gz
-        mv nvim-linux64 /opt/nvim
+        mv nvim-linux64 ~/.local/share/nvim
         rm nvim-linux64.tar.gz
-        nvim-linux64.tar.gz.sha256sum
-        echo 'export PATH=/opt/nvim/bin:$PATH' >> ~/.bashrc
-      become: yes
+        rm nvim-linux64.tar.gz.sha256sum
+        echo 'export PATH=$HOME/.local/share/nvim/bin:$PATH' >> ~/.bashrc
       args:
-        creates: /opt/nvim/bin/nvim
+        creates: ~/.local/share/nvim/bin/nvim
       tags: vim
 
     - name: Install lvim
       ansible.builtin.shell: |
+        which make
         which git
         which make
         which pip
