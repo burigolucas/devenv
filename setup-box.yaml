@@ -1,0 +1,142 @@
+---
+- name: setup linux development machine
+  hosts: localhost
+
+  roles:
+  - role: danielrolls.nix
+    become: yes
+
+  tasks:
+    - name: Install oh-my-bash
+      ansible.builtin.shell: bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
+      args:  
+        creates: ~/.oh-my-bash
+      tags: oh-my-bash
+
+    - name: Install ble.sh
+      ansible.builtin.shell: |
+        curl -L https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz | tar xJf -
+        bash ble-nightly/ble.sh --install ~/.local/share
+        echo 'source ~/.local/share/blesh/ble.sh' >> ~/.bashrc
+        rm -rf ble-nightly
+      args:  
+        creates: ~/.local/share/blesh/ble.sh
+
+    - name: Install atuin 
+      ansible.builtin.shell: curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | sh
+      args:
+        creates: ~/.atuin/bin/atuin
+      tags: atuin
+
+    - name: Configure atuin
+      ansible.builtin.lineinfile:
+        path: ~/.config/atuin/config.toml
+        regexp: '^[#]?filter_mode_shell_up_key_binding'
+        line: 'filter_mode_shell_up_key_binding = "directory"'
+      tags: atuin
+
+    - name: Configure atuin
+      ansible.builtin.lineinfile:
+        path: ~/.config/atuin/config.toml
+        regexp: '^[#]?search_mode_shell_up_key_binding'
+        line: 'search_mode_shell_up_key_binding = "prefix"'
+      tags: atuin
+
+    - name: Configure atuin
+      ansible.builtin.lineinfile:
+        path: ~/.config/atuin/config.toml
+        regexp: '^[#]?style ='
+        line: 'style = "auto"'
+      tags: atuin
+
+    - name: Configure atuin
+      ansible.builtin.lineinfile:
+        path: ~/.config/atuin/config.toml
+        regexp: '^[#]?inline_height'
+        line: 'inline_height = 20'
+      tags: atuin
+
+    - name: Install dasel
+      ansible.builtin.shell: curl -sSLf "$(curl -sSLf https://api.github.com/repos/tomwright/dasel/releases/latest | grep browser_download_url | grep linux_amd64 | grep -v .gz | cut -d\" -f 4)" -L -o dasel && chmod +x dasel && mv ./dasel /usr/local/bin/dasel
+      args:
+        creates: /usr/local/bin/dasel
+      become: yes
+      tags: dasel
+
+    - name: Install neovim
+      ansible.builtin.shell: |
+        wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
+        wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz.sha256sum
+        echo "$(cat nvim-linux64.tar.gz.sha256sum)" | sha256sum --check
+        if [ $? -ne 0 ]; then
+          exit 1
+        fi
+        tar -zxvf nvim-linux64.tar.gz
+        mv nvim-linux64 /opt/nvim
+        rm nvim-linux64.tar.gz
+        nvim-linux64.tar.gz.sha256sum
+        install -o root -g root -m 0755 -T /opt/nvim/bin/nvim /usr/local/bin/nvim
+      become: yes
+      args:
+        creates: /usr/local/bin/nvim
+      tags: vim
+
+
+    - name: Install kubectl and krew
+      ansible.builtin.shell: |
+        wget   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        wget   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+        echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+        if [ $? -ne 0 ]; then
+          exit 1
+        fi
+        install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+      become: yes
+      tags: kubernetes
+
+    # CLEAN UP
+    - name: Remove artifacts from bashrc
+      ansible.builtin.lineinfile:
+        path: ~/.bashrc
+        state: absent
+        regexp: '^source ~/.local/share/blesh/ble.sh'
+      when: "'cleanup' in ansible_run_tags"
+      tags: cleanup
+
+    - name: Remove atuin
+      ansible.builtin.shell: |
+        rm -rf ~/.atuin
+        rm -rf ~/.local/share/atuin
+        rm -f ~/.bash-preexec.sh
+      when: "'cleanup' in ansible_run_tags"
+      tags: cleanup
+
+    - name: Remove bleh
+      ansible.builtin.shell: |
+        rm -rf ~/.local/share/blesh
+      when: "'cleanup' in ansible_run_tags"
+      tags: cleanup
+
+    - name: Remove artifacts from bashrc
+      ansible.builtin.lineinfile:
+        path: ~/.bashrc
+        state: absent
+        regexp: '^source ~/.local/share/blesh/ble.sh'
+      when: "'cleanup' in ansible_run_tags"
+      tags: cleanup
+
+    - name: Remove artifacts from bashrc
+      ansible.builtin.lineinfile:
+        path: ~/.bashrc
+        state: absent
+        regexp: '.*atuin.*'
+      when: "'cleanup' in ansible_run_tags"
+      tags: cleanup
+
+    - name: Remove artifacts from bashrc
+      ansible.builtin.lineinfile:
+        path: ~/.bashrc
+        state: absent
+        regexp: '.*bash-preexec.*'
+      when: "'cleanup' in ansible_run_tags"
+      tags: cleanup
