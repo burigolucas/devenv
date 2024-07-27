@@ -7,11 +7,11 @@
     become: yes
 
   tasks:
-    - name: Install oh-my-bash
-      ansible.builtin.shell: bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
-      args:  
-        creates: ~/.oh-my-bash
-      tags: oh-my-bash
+    # - name: Install oh-my-bash
+    #   ansible.builtin.shell: bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
+    #   args:  
+    #     creates: ~/.oh-my-bash
+    #   tags: oh-my-bash
 
     - name: Install ble.sh
       ansible.builtin.shell: |
@@ -131,6 +131,33 @@
       when: "'cleanup-lvim' in ansible_run_tags"
       tags: cleanup-lvim
 
+    - name: Install nerd fonts
+      ansible.builtin.shell: |
+        ./install_nerdfonts.sh
+      args:
+        creates: ~/.local/share/fonts/NerdFonts 
+      tags: fonts
+
+    - name: Install starship
+      ansible.builtin.shell: |
+         curl -sS https://starship.rs/install.sh | sh -- -b ~/.local/bin -y
+         cp starship.toml ~/.config/starship.toml
+         echo 'eval "$(starship init bash)"' >> ~/.bashrc
+      args:
+        creates: ~/.local/bin/starship 
+      tags: starship
+
+    - name: Install lazygit
+      ansible.builtin.shell: |
+        TMP_DIR=$(mktemp -d)
+        cd ${TMP_DIR}
+        curl -LO https://github.com/jesseduffield/lazygit/releases/download/v0.43.1/lazygit_0.43.1_Linux_x86_64.tar.gz
+        tar -zxf lazygit_0.43.1_Linux_x86_64.tar.gz
+        mv lazygit ~/.local/bin
+      args:
+        creates: ~/.local/bin/lazygit 
+      tags: lazygit
+
     - name: Install kubectl and krew
       ansible.builtin.shell: |
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -153,7 +180,7 @@
     - name: Setup tmux as default shell
       ansible.builtin.lineinfile:
         path: ~/.bashrc
-        state: present
+        state: absent
         line: 'if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then exec tmux; fi'
       tags: env
 
