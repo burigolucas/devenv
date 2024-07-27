@@ -50,6 +50,8 @@
         set -g @plugin 'tmux-plugins/tmux-resurrect'
         set -g @plugin 'tmux-plugins/tmux-continuum'
         set -g @plugin 'tmux-plugins/tmux-sidebar'
+        set -g @plugin 'tmux-plugins/tmux-open'
+        set -g @plugin 'tmux-plugins/tmux-yank'
 
         # Other examples:
         # set -g @plugin 'github_username/plugin_name'
@@ -63,6 +65,7 @@
         # for neovim
         set -g @resurrect-strategy-nvim 'session'
         set -g @resurrect-processes 'lvim btop lazygit'
+        set -g @continuum-restore 'on'
 
         # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
         run '~/.tmux/plugins/tpm/tpm'
