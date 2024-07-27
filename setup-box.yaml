@@ -7,12 +7,77 @@
     become: yes
 
   tasks:
+    - name: Install make
+      ansible.builtin.package:
+        name: make
+        state: present
+      become: yes
+      tags: make
+
+    - name: Install gcc
+      ansible.builtin.package:
+        name: gcc
+        state: present
+      become: yes
+      tags: gcc
+
+    - name: Install meld
+      ansible.builtin.package:
+        name: meld
+        state: present
+      become: yes
+      tags: meld
+
+    - name: Install tmux
+      ansible.builtin.package:
+        name: tmux
+        state: present
+      become: yes
+      tags: meld
     # - name: Install oh-my-bash
     #   ansible.builtin.shell: bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
     #   args:  
     #     creates: ~/.oh-my-bash
     #   tags: oh-my-bash
 
+    - name: Configure tmux
+      ansible.builtin.shell: |
+        git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+        cat <<EOF >> ~/.tmux.conf
+        # List of plugins
+        set -g @plugin 'tmux-plugins/tpm'
+        set -g @plugin 'tmux-plugins/tmux-sensible'
+        set -g @plugin 'tmux-plugins/tmux-resurrect'
+        set -g @plugin 'tmux-plugins/tmux-continuum'
+        set -g @plugin 'tmux-plugins/tmux-sidebar'
+
+        # Other examples:
+        # set -g @plugin 'github_username/plugin_name'
+        # set -g @plugin 'github_username/plugin_name#branch'
+        # set -g @plugin 'git@github.com:user/plugin'
+        # set -g @plugin 'git@bitbucket.com:user/plugin'
+
+        set -g @resurrect-capture-pane-contents 'on'
+        # for vim
+        set -g @resurrect-strategy-vim 'session'
+        # for neovim
+        set -g @resurrect-strategy-nvim 'session'
+        set -g @resurrect-processes 'lvim btop lazygit'
+
+        # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+        run '~/.tmux/plugins/tpm/tpm'
+        EOF
+      # args:  
+      #   creates: ~/.local/share/blesh/ble.sh
+      tags: tmux-config
+
+    - name: Install btop
+      ansible.builtin.package:
+        name: btop 
+        state: present
+      become: yes
+      tags: btop
+      
     - name: Install ble.sh
       ansible.builtin.shell: |
         curl -L https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz | tar xJf -
@@ -76,26 +141,6 @@
       become: yes
       tags: ripgrep
 
-    - name: Install make
-      ansible.builtin.package:
-        name: make
-        state: present
-      become: yes
-      tags: make
-
-    - name: Install gcc
-      ansible.builtin.package:
-        name: gcc
-        state: present
-      become: yes
-      tags: gcc
-
-    - name: Install meld
-      ansible.builtin.package:
-        name: meld
-        state: present
-      become: yes
-      tags: meld
 
     - name: Install neovim
       ansible.builtin.shell: |
