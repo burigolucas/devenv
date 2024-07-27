@@ -150,6 +150,13 @@
         creates: ~/.local/bin/kubectl 
       tags: kubernetes
 
+    - name: Setup tmux as default shell
+      ansible.builtin.lineinfile:
+        path: ~/.bashrc
+        state: present
+        line: 'if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then exec tmux; fi'
+      tags: env
+
     # CLEAN UP
     - name: Remove artifacts from bashrc
       ansible.builtin.lineinfile:
