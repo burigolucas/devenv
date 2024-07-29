@@ -34,6 +34,7 @@
         state: present
       become: yes
       tags: meld
+
     # - name: Install oh-my-bash
     #   ansible.builtin.shell: bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
     #   args:  
@@ -43,37 +44,16 @@
     - name: Configure tmux
       ansible.builtin.shell: |
         git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-        cat <<EOF >> ~/.tmux.conf
-        # List of plugins
-        set -g @plugin 'tmux-plugins/tpm'
-        set -g @plugin 'tmux-plugins/tmux-sensible'
-        set -g @plugin 'tmux-plugins/tmux-resurrect'
-        set -g @plugin 'tmux-plugins/tmux-continuum'
-        set -g @plugin 'tmux-plugins/tmux-sidebar'
-        set -g @plugin 'tmux-plugins/tmux-open'
-        set -g @plugin 'tmux-plugins/tmux-yank'
-
-        # Other examples:
-        # set -g @plugin 'github_username/plugin_name'
-        # set -g @plugin 'github_username/plugin_name#branch'
-        # set -g @plugin 'git@github.com:user/plugin'
-        # set -g @plugin 'git@bitbucket.com:user/plugin'
-
-        set -g @resurrect-capture-pane-contents 'on'
-        # for vim
-        set -g @resurrect-strategy-vim 'session'
-        # for neovim
-        set -g @resurrect-strategy-nvim 'session'
-        set -g @resurrect-processes 'lvim btop lazygit'
-        set -g @continuum-restore 'on'
-
-        # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
-        run '~/.tmux/plugins/tpm/tpm'
-        EOF
-      # args:  
-      #   creates: ~/.local/share/blesh/ble.sh
+      args:  
+        creates: ~/.tmux/plugins/tpm
       tags: tmux-config
 
+    - name: Copy tmux config file
+      ansible.builtin.copy:
+        src: tmux.conf
+        dest: ~/.tmux.conf
+      tags: tmux-config
+        
     - name: Install btop
       ansible.builtin.package:
         name: btop 
@@ -96,6 +76,7 @@
         creates: ~/.atuin/bin/atuin
       tags: atuin
 
+    # THIS ONLY WORKS AFTER ATUIN IS INITIALIZED
     - name: Configure atuin
       ansible.builtin.lineinfile:
         path: ~/.config/atuin/config.toml
@@ -144,7 +125,6 @@
       become: yes
       tags: ripgrep
 
-
     - name: Install neovim
       ansible.builtin.shell: |
         wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
@@ -159,6 +139,7 @@
         creates: ~/.local/share/nvim/bin/nvim
       tags: vim
 
+    # THIS ONLY WORKS AFTER REFRESH THE SHELL
     - name: Install lvim
       ansible.builtin.shell: |
         which make
@@ -194,7 +175,7 @@
 
     - name: Install starship
       ansible.builtin.shell: |
-         curl -sS https://starship.rs/install.sh | sh -- -b ~/.local/bin -y
+         curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y
          cp starship.toml ~/.config/starship.toml
          echo 'eval "$(starship init bash)"' >> ~/.bashrc
       args:
@@ -214,6 +195,8 @@
 
     - name: Install kubectl and krew
       ansible.builtin.shell: |
+        TMP_DIR=$(mktemp -d)
+        cd ${TMP_DIR}
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
         echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
@@ -226,9 +209,9 @@
           tar zxvf "${KREW}.tar.gz" && \
          ./"${KREW}" install krew \
         )
-        export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
-      args:
-        creates: ~/.local/bin/kubectl 
+        echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> ~/bashrc
+        #     args:
+        #creates: ~/.local/bin/kubectl 
       tags: kubernetes
 
     - name: Setup tmux as default shell
