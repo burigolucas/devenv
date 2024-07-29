@@ -210,8 +210,8 @@
          ./"${KREW}" install krew \
         )
         echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> ~/bashrc
-        #     args:
-        #creates: ~/.local/bin/kubectl 
+      args:
+        creates: ~/.local/bin/kubectl 
       tags: kubernetes
 
     - name: Setup tmux as default shell
