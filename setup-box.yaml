@@ -214,6 +214,15 @@
         creates: ~/.local/bin/kubectl 
       tags: kubernetes
 
+    - name: Install kubectl plugins
+      ansible.builtin.shell: |
+        kubectl krew install ctx
+        kubectl krew install ns
+        kubectl krew install resource-capacity
+        kubectl krew install view-secre
+        kubectl krew install df-pv
+      tags: kubernetes-plugins
+
     - name: Setup tmux as default shell
       ansible.builtin.lineinfile:
         path: ~/.bashrc
