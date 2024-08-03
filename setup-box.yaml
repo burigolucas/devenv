@@ -35,13 +35,6 @@
       become: yes
       tags: tmux
       
-    - name: Install bat
-      ansible.builtin.package:
-        name: bat
-        state: present
-      become: yes
-      tags: bat
-
     # - name: Install oh-my-bash
     #   ansible.builtin.shell: bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
     #   args:  
@@ -60,6 +53,20 @@
         src: tmux.conf
         dest: ~/.tmux.conf
       tags: tmux-config
+
+    - name: Install bat
+      ansible.builtin.package:
+        name: bat
+        state: present
+      become: yes
+      tags: bat
+
+    - name: Install wuzz
+      ansible.builtin.shell: |
+        got install github.com/asciimoo/wuzz@latest
+      args:  
+        creates: ~/go/bin/wuzz
+      tags: wuzz
         
     - name: Install btop
       ansible.builtin.package:
