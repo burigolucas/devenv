@@ -218,6 +218,18 @@
         creates: ~/.local/bin/lazydocker 
       tags: lazydocker
 
+    - name: Install grpcurl
+      ansible.builtin.shell: |
+        TMP_DIR=$(mktemp -d)
+        cd ${TMP_DIR}
+        PACKAGE="grpcurl_1.9.1_linux_x86_64.tar.gz"
+        curl -LO https://github.com/fullstorydev/grpcurl/releases/download/v1.9.1/$PACKAGE
+        tar -zxf $PACKAGE
+        mv grpcurl ~/.local/bin
+      args:
+        creates: ~/.local/bin/grpcurl 
+      tags: grpcurl
+
     - name: Install kubectl and krew
       ansible.builtin.shell: |
         TMP_DIR=$(mktemp -d)
@@ -254,6 +266,22 @@
         state: absent
         line: 'if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then exec tmux; fi'
       tags: env
+
+    - name: Install vs code
+      ansible.builtin.shell: |
+        echo "Installing VS Code"
+        echo "Installing VS Code extensions"
+        bash install_vs-code-extensions.sh
+      tags: vs-code
+
+    - name: Install gprc dependencies
+      ansible.builtin.package:
+        name:
+          - protobuf-compiler
+          - libprotobuf-dev
+        state: present
+      become: yes
+      tags: grpc
 
     # CLEAN UP
     - name: Remove artifacts from bashrc
