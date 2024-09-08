@@ -74,7 +74,6 @@
         name:
           - com.google.AndroidStudio
         state: present
-      # become: true
       tags: android
 
     - name: Install tmux
@@ -123,28 +122,26 @@
       become: yes
       tags: bat
 
-    - name: Install make
-      ansible.builtin.package:
-        name: make
-        state: present
-      become: true
-      tags: make
-
-    - name: Install gcc
+    - name: Install dev tools
       ansible.builtin.package:
         name:
+          - make
+          - cmake
+          - clang
           - gcc
           - gcc-c++
+          - ninja-build # required for flutter linux desktop
+          - gtk3-devel  # required for flutter linux desktop
         state: present
       become: true
-      tags: gcc
+      tags: dev-tools
 
-    # - name: Install meld
-    #   ansible.builtin.package:
-    #     name: meld
-    #     state: present
-    #   become: yes
-    #   tags: meld
+    - name: Install meld
+      ansible.builtin.package:
+        name: meld
+        state: present
+      become: yes
+      tags: meld
 
     # - name: Install wuzz
     #   ansible.builtin.shell: |
@@ -359,14 +356,14 @@
     #   tags: env
 
 
-    - name: Install gprc dependencies
-      ansible.builtin.package:
-        name:
-          - protobuf-compiler
-          - libprotobuf-dev
-        state: present
-      become: yes
-      tags: grpc
+    # - name: Install gprc dependencies
+    #   ansible.builtin.package:
+    #     name:
+    #       - protobuf-compiler
+    #       - libprotobuf-dev
+    #     state: present
+    #   become: yes
+    #   tags: grpc
 
     # CLEAN UP
     - name: Remove artifacts from bashrc

@@ -14,7 +14,9 @@
    4. echo 'export PATH="~/development/flutter/bin:$PATH"' >> ~/.bashrc
 3. Check installation
    1. Open new shell
-   2. flutter doctor
+   2. Accept licenses:
+      1. yes | flutter doctor --android-licenses
+   3. flutter doctor
 
 ## TODO
 - fix configuration of atuin. It fails on fresh install due to the missing configuration file. Atuin needs to be initialized first before applying the configuration changes
