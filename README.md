@@ -1,12 +1,22 @@
 # devenv
-Linux box development environment setup
 
-sudo apt-get update
-sudo apt-get install gh
-sudo apt-get install ansible
-./setup.sh
+## Setup for Flutter
 
+1. Finish Android Studio setup
+   1. Open Android Studio and accept licenses
+   2. Download dependencies
+   3. Install "Android SDK Command-line tools": select "More Actions" -> "SDK Manager" -> "Language & Frameworks" -> "Android SDK" -> "SDK Tools" -> Select "Android SDK Command-line Tools (latest)" -> "OK"
+   4. echo 'export PATH="/var/lib/flatpak/app/com.google.AndroidStudio/current/active/files/extra/android-studio/bin:$PATH"' >> ~/.bashrc
+2. Install Flutter SDK
+   1. cd ~/Downloads && wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.2-stable.tar.xz
+   2. mkdir -p ~/development/
+   3. tar -xf ~/Downloads/flutter_linux_3.24.2-stable.tar.xz -C ~/development/
+   4. echo 'export PATH="~/development/flutter/bin:$PATH"' >> ~/.bashrc
+3. Check installation
+   1. Open new shell
+   2. flutter doctor
 
 ## TODO
 - fix configuration of atuin. It fails on fresh install due to the missing configuration file. Atuin needs to be initialized first before applying the configuration changes
 - lvim installation fails as nvim not yet in the path on fresh install
+

@@ -2,57 +2,119 @@
 - name: setup linux development machine
   hosts: localhost
 
-  roles:
-  - role: danielrolls.nix
-    become: yes
+  # roles:
+  # - role: danielrolls.nix
+  #   become: yes
 
   tasks:
-    - name: Install make
+    - name: Install unison
       ansible.builtin.package:
-        name: make
+        name: unison-gtk
         state: present
       become: yes
-      tags: make
+      tags: unison
 
-    - name: Install gcc
-      ansible.builtin.package:
-        name: gcc
-        state: present
-      become: yes
-      tags: gcc
+    - name: Install VS Code repo
+      become: true
+      ansible.builtin.yum_repository:
+        name: code
+        description: Visual Studio Code
+        file: vscode
+        baseurl: '{{ visual_studio_code_mirror }}/yumrepos/vscode'
+        gpgkey: '{{ visual_studio_code_mirror }}/keys/microsoft.asc'
+        gpgcheck: '{{ visual_studio_code_gpgcheck }}'
+      vars:
+        visual_studio_code_mirror: "https://packages.microsoft.com"
+        visual_studio_code_gpgcheck: true
+      tags: vs-code
 
-    - name: Install meld
-      ansible.builtin.package:
-        name: meld
+    - name: Install VS Code
+      become: true
+      ansible.builtin.dnf:
+        name: code
         state: present
-      become: yes
-      tags: meld
+      tags: vs-code
+
+    - name: Install VS Code extensions
+      ansible.builtin.shell: |
+        bash install_vs-code-extensions.sh
+      tags: vs-code
+
+    - name: Spotify
+      community.general.flatpak:
+        name: com.spotify.Client
+        state: present
+      tags: spotify
+
+    - name: Google Chrome
+      become: true
+      ansible.builtin.dnf:
+        name: google-chrome-stable
+        state: present
+      tags: chrome
+
+    - name: Podman
+      ansible.builtin.package:
+        name: podman-compose
+        state: present
+      become: true
+      tags: podman
+
+    - name: Java tools
+      ansible.builtin.package:
+        name:
+        - java-latest-openjdk-devel
+        - maven
+        state: present
+      become: true
+      tags: java
+
+    - name: Install Android Studio
+      community.general.flatpak:
+        name:
+          - com.google.AndroidStudio
+        state: present
+      # become: true
+      tags: android
 
     - name: Install tmux
       ansible.builtin.package:
         name: tmux
         state: present
-      become: yes
+      become: true
       tags: tmux
       
-    # - name: Install oh-my-bash
-    #   ansible.builtin.shell: bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
-    #   args:  
-    #     creates: ~/.oh-my-bash
-    #   tags: oh-my-bash
-
     - name: Configure tmux
       ansible.builtin.shell: |
         git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
       args:  
         creates: ~/.tmux/plugins/tpm
-      tags: tmux-config
+      tags: tmux
 
     - name: Copy tmux config file
       ansible.builtin.copy:
         src: tmux.conf
         dest: ~/.tmux.conf
-      tags: tmux-config
+      tags: tmux
+
+    - name: Configure git
+      ansible.builtin.shell: |
+        git config --global init.defaultBranch main
+        git config --global user.email "burigolucas@gmail.com"
+        git config --global user.name "Lucas Burigo"
+      args:  
+        creates: ~/.gitconfig
+      tags: git
+      
+    - name: Python
+      ansible.builtin.package:
+        name: 
+          - python3-virtualenv
+          - python3-setuptools
+          - python3-devel
+        state: present
+      become: true
+      tags: python
 
     - name: Install bat
       ansible.builtin.package:
@@ -61,218 +123,241 @@
       become: yes
       tags: bat
 
-    - name: Install wuzz
-      ansible.builtin.shell: |
-        got install github.com/asciimoo/wuzz@latest
-      args:  
-        creates: ~/go/bin/wuzz
-      tags: wuzz
+    - name: Install make
+      ansible.builtin.package:
+        name: make
+        state: present
+      become: true
+      tags: make
+
+    - name: Install gcc
+      ansible.builtin.package:
+        name:
+          - gcc
+          - gcc-c++
+        state: present
+      become: true
+      tags: gcc
+
+    # - name: Install meld
+    #   ansible.builtin.package:
+    #     name: meld
+    #     state: present
+    #   become: yes
+    #   tags: meld
+
+    # - name: Install wuzz
+    #   ansible.builtin.shell: |
+    #     got install github.com/asciimoo/wuzz@latest
+    #   args:  
+    #     creates: ~/go/bin/wuzz
+    #   tags: wuzz
         
-    - name: Install btop
-      ansible.builtin.package:
-        name: btop 
-        state: present
-      become: yes
-      tags: btop
+    # - name: Install btop
+    #   ansible.builtin.package:
+    #     name: btop 
+    #     state: present
+    #   become: yes
+    #   tags: btop
       
-    - name: Install ble.sh
-      ansible.builtin.shell: |
-        curl -L https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz | tar xJf -
-        bash ble-nightly/ble.sh --install ~/.local/share
-        echo 'source ~/.local/share/blesh/ble.sh' >> ~/.bashrc
-        rm -rf ble-nightly
-      args:  
-        creates: ~/.local/share/blesh/ble.sh
+    # - name: Install oh-my-bash
+    #   ansible.builtin.shell: bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
+    #   args:  
+    #     creates: ~/.oh-my-bash
+    #   tags: oh-my-bash
 
-    - name: Install atuin 
-      ansible.builtin.shell: curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | sh
-      args:
-        creates: ~/.atuin/bin/atuin
-      tags: atuin
+    # - name: Install ble.sh
+    #   ansible.builtin.shell: |
+    #     curl -L https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz | tar xJf -
+    #     bash ble-nightly/ble.sh --install ~/.local/share
+    #     echo 'source ~/.local/share/blesh/ble.sh' >> ~/.bashrc
+    #     rm -rf ble-nightly
+    #   args:  
+    #     creates: ~/.local/share/blesh/ble.sh
 
-    # THIS ONLY WORKS AFTER ATUIN IS INITIALIZED
-    - name: Configure atuin
-      ansible.builtin.lineinfile:
-        path: ~/.config/atuin/config.toml
-        regexp: '^[#]?filter_mode_shell_up_key_binding'
-        line: 'filter_mode_shell_up_key_binding = "directory"'
-      tags: atuin
+    # - name: Install atuin 
+    #   ansible.builtin.shell: curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | sh
+    #   args:
+    #     creates: ~/.atuin/bin/atuin
+    #   tags: atuin
 
-    - name: Configure atuin
-      ansible.builtin.lineinfile:
-        path: ~/.config/atuin/config.toml
-        regexp: '^[#]?search_mode_shell_up_key_binding'
-        line: 'search_mode_shell_up_key_binding = "prefix"'
-      tags: atuin
+    # # THIS ONLY WORKS AFTER ATUIN IS INITIALIZED
+    # - name: Configure atuin
+    #   ansible.builtin.lineinfile:
+    #     path: ~/.config/atuin/config.toml
+    #     regexp: '^[#]?filter_mode_shell_up_key_binding'
+    #     line: 'filter_mode_shell_up_key_binding = "directory"'
+    #   tags: atuin
 
-    - name: Configure atuin
-      ansible.builtin.lineinfile:
-        path: ~/.config/atuin/config.toml
-        regexp: '^[#]?style ='
-        line: 'style = "auto"'
-      tags: atuin
+    # - name: Configure atuin
+    #   ansible.builtin.lineinfile:
+    #     path: ~/.config/atuin/config.toml
+    #     regexp: '^[#]?search_mode_shell_up_key_binding'
+    #     line: 'search_mode_shell_up_key_binding = "prefix"'
+    #   tags: atuin
 
-    - name: Configure atuin
-      ansible.builtin.lineinfile:
-        path: ~/.config/atuin/config.toml
-        regexp: '^[#]?inline_height'
-        line: 'inline_height = 20'
-      tags: atuin
+    # - name: Configure atuin
+    #   ansible.builtin.lineinfile:
+    #     path: ~/.config/atuin/config.toml
+    #     regexp: '^[#]?style ='
+    #     line: 'style = "auto"'
+    #   tags: atuin
 
-    - name: Install dasel
-      ansible.builtin.shell: curl -sSLf "$(curl -sSLf https://api.github.com/repos/tomwright/dasel/releases/latest | grep browser_download_url | grep linux_amd64 | grep -v .gz | cut -d\" -f 4)" -L -o dasel && chmod +x dasel && mv ./dasel /usr/local/bin/dasel
-      args:
-        creates: /usr/local/bin/dasel
-      become: yes
-      tags: dasel
+    # - name: Configure atuin
+    #   ansible.builtin.lineinfile:
+    #     path: ~/.config/atuin/config.toml
+    #     regexp: '^[#]?inline_height'
+    #     line: 'inline_height = 20'
+    #   tags: atuin
 
-    - name: Install rust
-      ansible.builtin.shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-      args:
-        creates: ~/.cargo/bin/rustup
-      tags: rust
+    # - name: Install dasel
+    #   ansible.builtin.shell: curl -sSLf "$(curl -sSLf https://api.github.com/repos/tomwright/dasel/releases/latest | grep browser_download_url | grep linux_amd64 | grep -v .gz | cut -d\" -f 4)" -L -o dasel && chmod +x dasel && mv ./dasel /usr/local/bin/dasel
+    #   args:
+    #     creates: /usr/local/bin/dasel
+    #   become: yes
+    #   tags: dasel
 
-    - name: Install ripgrep
-      ansible.builtin.package:
-        name: ripgrep
-        state: present
-      become: yes
-      tags: ripgrep
+    # - name: Install rust
+    #   ansible.builtin.shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    #   args:
+    #     creates: ~/.cargo/bin/rustup
+    #   tags: rust
 
-    - name: Install neovim
-      ansible.builtin.shell: |
-        wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
-        wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz.sha256sum
-        echo "$(cat nvim-linux64.tar.gz.sha256sum)" | sha256sum --check
-        tar -zxvf nvim-linux64.tar.gz
-        mv nvim-linux64 ~/.local/share/nvim
-        rm nvim-linux64.tar.gz
-        rm nvim-linux64.tar.gz.sha256sum
-        echo 'export PATH=$HOME/.local/share/nvim/bin:$PATH' >> ~/.bashrc
-      args:
-        creates: ~/.local/share/nvim/bin/nvim
-      tags: vim
+    # - name: Install ripgrep
+    #   ansible.builtin.package:
+    #     name: ripgrep
+    #     state: present
+    #   become: yes
+    #   tags: ripgrep
 
-    # THIS ONLY WORKS AFTER REFRESH THE SHELL
-    - name: Install lvim
-      ansible.builtin.shell: |
-        which make
-        which git
-        which make
-        which pip
-        which npm
-        which node
-        which cargo
-        which rg
-        yes | curl -s https://raw.githubusercontent.com/LunarVim/LunarVim/release-1.4/neovim-0.9/utils/installer/install.sh |  LV_BRANCH=release-1.4/neovim-0.9 bash 
-      args:
-        creates: ~/.local/bin/lvim
-      tags: lvim
+    # - name: Install neovim
+    #   ansible.builtin.shell: |
+    #     wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
+    #     wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz.sha256sum
+    #     echo "$(cat nvim-linux64.tar.gz.sha256sum)" | sha256sum --check
+    #     tar -zxvf nvim-linux64.tar.gz
+    #     mv nvim-linux64 ~/.local/share/nvim
+    #     rm nvim-linux64.tar.gz
+    #     rm nvim-linux64.tar.gz.sha256sum
+    #     echo 'export PATH=$HOME/.local/share/nvim/bin:$PATH' >> ~/.bashrc
+    #   args:
+    #     creates: ~/.local/share/nvim/bin/nvim
+    #   tags: vim
 
-    - name: Copy lvim config file
-      ansible.builtin.copy:
-        src: config.lua
-        dest: ~/.config/lvim/config.lua
-      tags: lvim-config
+    # # THIS ONLY WORKS AFTER REFRESH THE SHELL
+    # - name: Install lvim
+    #   ansible.builtin.shell: |
+    #     which make
+    #     which git
+    #     which make
+    #     which pip
+    #     which npm
+    #     which node
+    #     which cargo
+    #     which rg
+    #     yes | curl -s https://raw.githubusercontent.com/LunarVim/LunarVim/release-1.4/neovim-0.9/utils/installer/install.sh |  LV_BRANCH=release-1.4/neovim-0.9 bash 
+    #   args:
+    #     creates: ~/.local/bin/lvim
+    #   tags: lvim
 
-    - name: Uninstall lvim
-      ansible.builtin.shell: bash ~/.local/share/lunarvim/lvim/utils/installer/uninstall.sh 
-      when: "'cleanup-lvim' in ansible_run_tags"
-      tags: cleanup-lvim
+    # - name: Copy lvim config file
+    #   ansible.builtin.copy:
+    #     src: config.lua
+    #     dest: ~/.config/lvim/config.lua
+    #   tags: lvim-config
 
-    - name: Install nerd fonts
-      ansible.builtin.shell: |
-        ./install_nerdfonts.sh
-      args:
-        creates: ~/.local/share/fonts/NerdFonts 
-      tags: fonts
+    # - name: Uninstall lvim
+    #   ansible.builtin.shell: bash ~/.local/share/lunarvim/lvim/utils/installer/uninstall.sh 
+    #   when: "'cleanup-lvim' in ansible_run_tags"
+    #   tags: cleanup-lvim
 
-    - name: Install starship
-      ansible.builtin.shell: |
-         curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y
-         cp starship.toml ~/.config/starship.toml
-         echo 'eval "$(starship init bash)"' >> ~/.bashrc
-      args:
-        creates: ~/.local/bin/starship 
-      tags: starship
+    # - name: Install nerd fonts
+    #   ansible.builtin.shell: |
+    #     ./install_nerdfonts.sh
+    #   args:
+    #     creates: ~/.local/share/fonts/NerdFonts 
+    #   tags: fonts
 
-    - name: Install lazygit
-      ansible.builtin.shell: |
-        TMP_DIR=$(mktemp -d)
-        cd ${TMP_DIR}
-        curl -LO https://github.com/jesseduffield/lazygit/releases/download/v0.43.1/lazygit_0.43.1_Linux_x86_64.tar.gz
-        tar -zxf lazygit_0.43.1_Linux_x86_64.tar.gz
-        mv lazygit ~/.local/bin
-      args:
-        creates: ~/.local/bin/lazygit 
-      tags: lazygit
+    # - name: Install starship
+    #   ansible.builtin.shell: |
+    #      curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y
+    #      cp starship.toml ~/.config/starship.toml
+    #      echo 'eval "$(starship init bash)"' >> ~/.bashrc
+    #   args:
+    #     creates: ~/.local/bin/starship 
+    #   tags: starship
 
-    - name: Install lazydocker
-      ansible.builtin.shell: |
-        TMP_DIR=$(mktemp -d)
-        cd ${TMP_DIR}
-        curl -LO https://github.com/jesseduffield/lazydocker/releases/download/v0.23.3/lazydocker_0.23.3_Linux_x86_64.tar.gz
-        tar -zxf lazydocker_0.23.3_Linux_x86_64.tar.gz
-        mv lazydocker ~/.local/bin
-      args:
-        creates: ~/.local/bin/lazydocker 
-      tags: lazydocker
+    # - name: Install lazygit
+    #   ansible.builtin.shell: |
+    #     TMP_DIR=$(mktemp -d)
+    #     cd ${TMP_DIR}
+    #     curl -LO https://github.com/jesseduffield/lazygit/releases/download/v0.43.1/lazygit_0.43.1_Linux_x86_64.tar.gz
+    #     tar -zxf lazygit_0.43.1_Linux_x86_64.tar.gz
+    #     mv lazygit ~/.local/bin
+    #   args:
+    #     creates: ~/.local/bin/lazygit 
+    #   tags: lazygit
 
-    - name: Install grpcurl
-      ansible.builtin.shell: |
-        TMP_DIR=$(mktemp -d)
-        cd ${TMP_DIR}
-        PACKAGE="grpcurl_1.9.1_linux_x86_64.tar.gz"
-        curl -LO https://github.com/fullstorydev/grpcurl/releases/download/v1.9.1/$PACKAGE
-        tar -zxf $PACKAGE
-        mv grpcurl ~/.local/bin
-      args:
-        creates: ~/.local/bin/grpcurl 
-      tags: grpcurl
+    # - name: Install lazydocker
+    #   ansible.builtin.shell: |
+    #     TMP_DIR=$(mktemp -d)
+    #     cd ${TMP_DIR}
+    #     curl -LO https://github.com/jesseduffield/lazydocker/releases/download/v0.23.3/lazydocker_0.23.3_Linux_x86_64.tar.gz
+    #     tar -zxf lazydocker_0.23.3_Linux_x86_64.tar.gz
+    #     mv lazydocker ~/.local/bin
+    #   args:
+    #     creates: ~/.local/bin/lazydocker 
+    #   tags: lazydocker
 
-    - name: Install kubectl and krew
-      ansible.builtin.shell: |
-        TMP_DIR=$(mktemp -d)
-        cd ${TMP_DIR}
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
-        echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
-        install kubectl ~/.local/bin/kubectl
-        ( set -x; cd "$(mktemp -d)" && \
-          OS="$(uname | tr '[:upper:]' '[:lower:]')" && \
-          ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" && \
-          KREW="krew-${OS}_${ARCH}" && \
-          curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" && \
-          tar zxvf "${KREW}.tar.gz" && \
-         ./"${KREW}" install krew \
-        )
-        echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> ~/.bashrc
-      args:
-        creates: ~/.local/bin/kubectl 
-      tags: kubernetes
+    # - name: Install grpcurl
+    #   ansible.builtin.shell: |
+    #     TMP_DIR=$(mktemp -d)
+    #     cd ${TMP_DIR}
+    #     PACKAGE="grpcurl_1.9.1_linux_x86_64.tar.gz"
+    #     curl -LO https://github.com/fullstorydev/grpcurl/releases/download/v1.9.1/$PACKAGE
+    #     tar -zxf $PACKAGE
+    #     mv grpcurl ~/.local/bin
+    #   args:
+    #     creates: ~/.local/bin/grpcurl 
+    #   tags: grpcurl
 
-    - name: Install kubectl plugins
-      ansible.builtin.shell: |
-        kubectl krew install ctx
-        kubectl krew install ns
-        kubectl krew install resource-capacity
-        kubectl krew install view-secre
-        kubectl krew install df-pv
-      tags: kubernetes-plugins
+    # - name: Install kubectl and krew
+    #   ansible.builtin.shell: |
+    #     TMP_DIR=$(mktemp -d)
+    #     cd ${TMP_DIR}
+    #     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    #     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+    #     echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+    #     install kubectl ~/.local/bin/kubectl
+    #     ( set -x; cd "$(mktemp -d)" && \
+    #       OS="$(uname | tr '[:upper:]' '[:lower:]')" && \
+    #       ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" && \
+    #       KREW="krew-${OS}_${ARCH}" && \
+    #       curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" && \
+    #       tar zxvf "${KREW}.tar.gz" && \
+    #      ./"${KREW}" install krew \
+    #     )
+    #     echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> ~/.bashrc
+    #   args:
+    #     creates: ~/.local/bin/kubectl 
+    #   tags: kubernetes
 
-    - name: Setup tmux as default shell
-      ansible.builtin.lineinfile:
-        path: ~/.bashrc
-        state: absent
-        line: 'if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then exec tmux; fi'
-      tags: env
+    # - name: Install kubectl plugins
+    #   ansible.builtin.shell: |
+    #     kubectl krew install ctx
+    #     kubectl krew install ns
+    #     kubectl krew install resource-capacity
+    #     kubectl krew install view-secre
+    #     kubectl krew install df-pv
+    #   tags: kubernetes-plugins
 
-    - name: Install vs code
-      ansible.builtin.shell: |
-        echo "Installing VS Code"
-        echo "Installing VS Code extensions"
-        bash install_vs-code-extensions.sh
-      tags: vs-code
+    # - name: Setup tmux as default shell
+    #   ansible.builtin.lineinfile:
+    #     path: ~/.bashrc
+    #     state: absent
+    #     line: 'if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then exec tmux; fi'
+    #   tags: env
+
 
     - name: Install gprc dependencies
       ansible.builtin.package:

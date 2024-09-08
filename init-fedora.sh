@@ -1,12 +1,13 @@
 #!/bin/bash
 
-echo "Setting up the local development environment"
-echo "Some packages will be installed system-wide"
+echo "Initial setup for Fedora"
 echo
+
+sudo dnf install \
+	vim-enhanced \
+	ansible-core
 
 ansible-galaxy collection install community.general
 ansible-galaxy role install danielrolls.nix
 ansible-playbook setup-box.yaml --ask-become -t unison
 ansible-playbook setup-box.yaml -t vs-code
-
-# ansible-playbook setup-box.yaml --ask-become
