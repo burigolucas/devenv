@@ -1,6 +1,8 @@
 #!/bin/bash
 
 extensions=(
+  "vscjava.vscode-spring-initializr"
+  "vscjava.vscode-spring-boot-dashboard"
   "tamasfe.even-better-toml"
   "yzhang.markdown-all-in-one"
   "Dart-Code.dart-code"
