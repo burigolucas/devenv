@@ -14,6 +14,28 @@
       become: yes
       tags: unison
 
+    - name: Install VSCodium repo
+      become: true
+      ansible.builtin.yum_repository:
+        name: download.vscodium.com
+        description: VS Codium
+        file: vscodium
+        baseurl: '{{ mirror }}'
+        gpgkey: '{{ gpgkey }}'
+        gpgcheck: '{{ gpgcheck }}'
+      vars:
+        mirror: "https://download.vscodium.com/rpms/"
+        gpgcheck: true
+        gpgkey: https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg
+      tags: codium
+
+    - name: Install VSCodium
+      become: true
+      ansible.builtin.dnf:
+        name: codium
+        state: present
+      tags: codium
+
     - name: Install VS Code repo
       become: true
       ansible.builtin.yum_repository:
