@@ -14,6 +14,19 @@
       become: yes
       tags: unison
 
+    - name: Install vim
+      ansible.builtin.package:
+        name: vim
+        state: present
+      become: yes
+      tags: vim
+
+    - name: Configure vim
+      ansible.builtin.copy:
+        src: vimrc
+        dest: ~/.vimrc
+      tags: vim
+
     - name: Install VSCodium repo
       become: true
       ansible.builtin.yum_repository:
