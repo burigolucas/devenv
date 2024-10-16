@@ -7,6 +7,13 @@
   #   become: yes
 
   tasks:
+    - name: Install npm
+      ansible.builtin.package:
+        name: nodejs-npm
+        state: present
+      become: yes
+      tags: nodejs
+
     - name: Install unison
       ansible.builtin.package:
         name: unison-gtk
