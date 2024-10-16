@@ -5,4 +5,11 @@ redhat.vscode-openshift-connector
 redhat.vscode-redhat-account
 redhat.vscode-tekton-pipelines
 redhat.vscode-yaml
+vscjava.vscode-gradle
+vscjava.vscode-java-debug
+vscjava.vscode-java-dependency
+vscjava.vscode-java-pack
+vscjava.vscode-java-test
+vscjava.vscode-maven
+vscjava.vscode-spring-boot-dashboard
 vscjava.vscode-spring-initializr
