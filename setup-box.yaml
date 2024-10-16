@@ -49,6 +49,11 @@
         state: present
       tags: codium
 
+    - name: Install Codium extensions
+      ansible.builtin.shell: |
+        cat codium-extensions | xargs -n1 codium --install-extension
+      tags: codium
+
     - name: Install VS Code repo
       become: true
       ansible.builtin.yum_repository:

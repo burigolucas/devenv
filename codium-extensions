@@ -1,5 +1,8 @@
 humao.rest-client
 ms-kubernetes-tools.vscode-kubernetes-tools
+redhat.java
 redhat.vscode-openshift-connector
 redhat.vscode-redhat-account
+redhat.vscode-tekton-pipelines
 redhat.vscode-yaml
+vscjava.vscode-spring-initializr
