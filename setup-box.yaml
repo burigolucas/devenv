@@ -59,7 +59,7 @@
     - name: Install Codium extensions
       ansible.builtin.shell: |
         cat codium-extensions | xargs -n1 codium --install-extension
-      tags: codium
+      tags: codium, codium-extensions
 
     - name: Install VS Code repo
       become: true
