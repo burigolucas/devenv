@@ -7,6 +7,14 @@
   #   become: true
 
   tasks:
+    - name: Install bash addons
+      ansible.builtin.package:
+        name:
+        - bash-completion
+        state: present
+      become: true
+      tags: bash
+
     - name: Install npm
       ansible.builtin.package:
         name: nodejs-npm
@@ -321,11 +329,19 @@
         update_homebrew: true
       tags: kubernetes
 
-    - name: Setup path for krew
-      lineinfile:
+    - name: Setup env and aliases
+      ansible.builtin.blockinfile:
         path: ~/.bashrc
-        line: 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"'
-      tags: kubernetes
+        block: |
+          export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+          source <(kubectl completion bash)
+          alias k="kubectl"
+          alias kctx='f() { [ "$1" ] && kubectl config use-context $1 || kubectl config current-context ; } ; f'
+          alias kns='f() { [ "$1" ] && kubectl config set-context --current --namespace $1 || kubectl config view --minify | grep namespace | cut -d" " -f6 ; } ; f'
+          
+          # enable completion for the alias
+          complete -F __start_kubectl k
+      tags: bash
 
     - name: do facts module to get latest information
       setup:
@@ -339,17 +355,6 @@
         kubectl krew install view-secret
         kubectl krew install df-pv
       tags: kubernetes
-
-    - name: Insert/Update kubectl aliases
-      ansible.builtin.blockinfile:
-        path: ~/.bashrc
-        marker: "# <-- ANSIBLE MANAGED BLOCK -->"
-        insertafter: "# ALIASES"
-        block: |
-          alias k="kubectl"
-          alias kctx='f() { [ "$1" ] && kubectl config use-context $1 || kubectl config current-context ; } ; f'
-          alias kns='f() { [ "$1" ] && kubectl config set-context --current --namespace $1 || kubectl config view --minify | grep namespace | cut -d" " -f6 ; } ; f'
-      tags: aliases
 
     - name: Install starship
       ansible.builtin.shell: |
