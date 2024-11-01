@@ -76,7 +76,6 @@ https://gogh-co.github.io/Gogh/
 bash -c  "$(wget -qO- https://git.io/vQgMr)" 
 
 
-
 flatpak install flathub com.microsoft.Edge
 
 
@@ -84,18 +83,7 @@ sudo dnf install okular
 
 codium config
 
-SHIFT+SPACE for key shortcut "Run selected text"
-
-## HOMEBREW
-
-homebrew for CLIs
-
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-
-echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /home/burigo/.bashrc
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-sudo yum groupinstall 'Development Tools'
+SHIFT+ALT+SPACE for key shortcut "Run selected text"
 
 ## ODO
 
@@ -104,11 +92,6 @@ curl -L https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-
 echo "$(<odo.sha256)  odo" | shasum -a 256 --check
 
 sudo install -o root -g root -m 0755 odo /usr/local/bin/odo
-
-
-
-sudo dnf install yq
-
 
 
 sudo timeout:

@@ -7,6 +7,15 @@
   #   become: true
 
   tasks:
+    - name: Install useful CLIs
+      ansible.builtin.package:
+        name:
+        - jq
+        - yq
+        state: present
+      become: true
+      tags: clis
+
     - name: Install bash addons
       ansible.builtin.package:
         name:
