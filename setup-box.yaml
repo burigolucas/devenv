@@ -325,8 +325,10 @@
         - helm
         - kubectl
         - krew
+        - derailed/k9s/k9s
+        - tektoncd-cli
         state: latest
-        update_homebrew: true
+        update_homebrew: false
       tags: kubernetes
 
     - name: Setup env and aliases
