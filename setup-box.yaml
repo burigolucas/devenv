@@ -287,20 +287,71 @@
       become: false # need sudo to install brew, but should not run as root
       tags: homebrew
 
-    - name: Uninstall homebrew
-      ansible.builtin.shell: |
-        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
-      become: true
-      when: "'cleanup' in ansible_run_tags"
-      tags: cleanup, cleanup-homebrew
+    - name: do facts module to get latest information
+      setup:
+      tags: homebrew
+
+    # - name: Install kubectl and krew
+    #   ansible.builtin.shell: |
+    #     TMP_DIR=$(mktemp -d)
+    #     cd ${TMP_DIR}
+    #     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    #     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+    #     echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+    #     install kubectl ~/.local/bin/kubectl
+    #     ( set -x; cd "$(mktemp -d)" && \
+    #       OS="$(uname | tr '[:upper:]' '[:lower:]')" && \
+    #       ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" && \
+    #       KREW="krew-${OS}_${ARCH}" && \
+    #       curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" && \
+    #       tar zxvf "${KREW}.tar.gz" && \
+    #      ./"${KREW}" install krew \
+    #     )
+    #     echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> ~/.bashrc
+    #   args:
+    #     creates: ~/.local/bin/kubectl 
+    #   tags: kubernetes
 
     - community.general.homebrew:
         name:
         - helm
         - kubectl
+        - krew
         state: latest
         update_homebrew: true
-      tags: homebrew
+      tags: kubernetes
+
+    - name: Setup path for krew
+      lineinfile:
+        path: ~/.bashrc
+        line: 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"'
+      tags: kubernetes
+
+    - name: do facts module to get latest information
+      setup:
+      tags: kubernetes
+
+    - name: Install kubectl plugins
+      ansible.builtin.shell: |
+        kubectl krew install ctx
+        kubectl krew install ns
+        kubectl krew install resource-capacity
+        kubectl krew install view-secret
+        kubectl krew install df-pv
+      tags: kubernetes
+
+    - name: Install starship
+      ansible.builtin.shell: |
+         curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y
+         cp starship.toml ~/.config/starship.toml
+         echo 'eval "$(starship init bash)"' >> ~/.bashrc
+      args:
+        creates: ~/.local/bin/starship 
+      tags: starship
+
+    - name: do facts module to get latest information
+      setup:
+      tags: starship
 
     # - name: Install wuzz
     #   ansible.builtin.shell: |
@@ -399,14 +450,6 @@
     #     creates: ~/.local/share/fonts/NerdFonts 
     #   tags: fonts
 
-    # - name: Install starship
-    #   ansible.builtin.shell: |
-    #      curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y
-    #      cp starship.toml ~/.config/starship.toml
-    #      echo 'eval "$(starship init bash)"' >> ~/.bashrc
-    #   args:
-    #     creates: ~/.local/bin/starship 
-    #   tags: starship
 
     # - name: Install lazygit
     #   ansible.builtin.shell: |
@@ -442,35 +485,6 @@
     #     creates: ~/.local/bin/grpcurl 
     #   tags: grpcurl
 
-    # - name: Install kubectl and krew
-    #   ansible.builtin.shell: |
-    #     TMP_DIR=$(mktemp -d)
-    #     cd ${TMP_DIR}
-    #     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-    #     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
-    #     echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
-    #     install kubectl ~/.local/bin/kubectl
-    #     ( set -x; cd "$(mktemp -d)" && \
-    #       OS="$(uname | tr '[:upper:]' '[:lower:]')" && \
-    #       ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" && \
-    #       KREW="krew-${OS}_${ARCH}" && \
-    #       curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" && \
-    #       tar zxvf "${KREW}.tar.gz" && \
-    #      ./"${KREW}" install krew \
-    #     )
-    #     echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> ~/.bashrc
-    #   args:
-    #     creates: ~/.local/bin/kubectl 
-    #   tags: kubernetes
-
-    # - name: Install kubectl plugins
-    #   ansible.builtin.shell: |
-    #     kubectl krew install ctx
-    #     kubectl krew install ns
-    #     kubectl krew install resource-capacity
-    #     kubectl krew install view-secre
-    #     kubectl krew install df-pv
-    #   tags: kubernetes-plugins
 
     # - name: Setup tmux as default shell
     #   ansible.builtin.lineinfile:
@@ -495,6 +509,14 @@
         path: ~/.bashrc
         state: absent
         regexp: '^source ~/.local/share/blesh/ble.sh'
+      when: "'cleanup' in ansible_run_tags"
+      tags: cleanup
+
+
+    - name: Uninstall homebrew
+      ansible.builtin.shell: |
+        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+      become: true
       when: "'cleanup' in ansible_run_tags"
       tags: cleanup
 

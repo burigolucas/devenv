@@ -111,6 +111,8 @@ sudo dnf install yq
 
 
 
-sudo timeout
-
+sudo timeout:
 https://www.omglinux.com/change-sudo-timeout-linux/#:~:text=By%20default%2C%20a%20standard%20sudo,tab%20you're%20working%20from.
+
+disable gnome shell extensions:
+gsettings set org.gnome.shell disable-user-extensions true
