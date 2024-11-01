@@ -340,6 +340,17 @@
         kubectl krew install df-pv
       tags: kubernetes
 
+    - name: Insert/Update kubectl aliases
+      ansible.builtin.blockinfile:
+        path: ~/.bashrc
+        marker: "# <-- ANSIBLE MANAGED BLOCK -->"
+        insertafter: "# ALIASES"
+        block: |
+          alias k="kubectl"
+          alias kctx='f() { [ "$1" ] && kubectl config use-context $1 || kubectl config current-context ; } ; f'
+          alias kns='f() { [ "$1" ] && kubectl config set-context --current --namespace $1 || kubectl config view --minify | grep namespace | cut -d" " -f6 ; } ; f'
+      tags: aliases
+
     - name: Install starship
       ansible.builtin.shell: |
          curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y
