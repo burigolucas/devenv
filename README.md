@@ -108,3 +108,9 @@ sudo install -o root -g root -m 0755 odo /usr/local/bin/odo
 
 
 sudo dnf install yq
+
+
+
+sudo timeout
+
+https://www.omglinux.com/change-sudo-timeout-linux/#:~:text=By%20default%2C%20a%20standard%20sudo,tab%20you're%20working%20from.

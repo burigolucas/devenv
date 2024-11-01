@@ -4,28 +4,28 @@
 
   # roles:
   # - role: danielrolls.nix
-  #   become: yes
+  #   become: true
 
   tasks:
     - name: Install npm
       ansible.builtin.package:
         name: nodejs-npm
         state: present
-      become: yes
+      become: true
       tags: nodejs
 
     - name: Install unison
       ansible.builtin.package:
         name: unison-gtk
         state: present
-      become: yes
+      become: true
       tags: unison
 
     - name: Install vim
       ansible.builtin.package:
         name: vim
         state: present
-      become: yes
+      become: true
       tags: vim
 
     - name: Configure vim
@@ -198,8 +198,15 @@
       ansible.builtin.package:
         name: bat
         state: present
-      become: yes
+      become: true
       tags: bat
+
+    - name: Install the 'Development tools' package group
+      ansible.builtin.dnf:
+        name: '@Development tools'
+        state: present
+      become: true
+      tags: dev-tools
 
     - name: Install dev tools
       ansible.builtin.package:
@@ -219,37 +226,8 @@
       ansible.builtin.package:
         name: meld
         state: present
-      become: yes
+      become: true
       tags: meld
-
-    # - name: Install wuzz
-    #   ansible.builtin.shell: |
-    #     got install github.com/asciimoo/wuzz@latest
-    #   args:  
-    #     creates: ~/go/bin/wuzz
-    #   tags: wuzz
-        
-    # - name: Install btop
-    #   ansible.builtin.package:
-    #     name: btop 
-    #     state: present
-    #   become: yes
-    #   tags: btop
-      
-    # - name: Install oh-my-bash
-    #   ansible.builtin.shell: bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
-    #   args:  
-    #     creates: ~/.oh-my-bash
-    #   tags: oh-my-bash
-
-    # - name: Install ble.sh
-    #   ansible.builtin.shell: |
-    #     curl -L https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz | tar xJf -
-    #     bash ble-nightly/ble.sh --install ~/.local/share
-    #     echo 'source ~/.local/share/blesh/ble.sh' >> ~/.bashrc
-    #     rm -rf ble-nightly
-    #   args:  
-    #     creates: ~/.local/share/blesh/ble.sh
 
     - name: Install atuin 
       ansible.builtin.shell: curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | sh
@@ -298,11 +276,66 @@
         line: 'inline_height = 20'
       tags: atuin
 
+    - name: Install homebrew
+      ansible.builtin.shell: |
+        NONINTERACTIVE=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        echo >> /home/$USERNAME/.bashrc
+        echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /home/$USERNAME/.bashrc
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+      args:  
+        creates: /home/linuxbrew/.linuxbrew/bin
+      become: false # need sudo to install brew, but should not run as root
+      tags: homebrew
+
+    - name: Uninstall homebrew
+      ansible.builtin.shell: |
+        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+      become: true
+      when: "'cleanup' in ansible_run_tags"
+      tags: cleanup, cleanup-homebrew
+
+    - community.general.homebrew:
+        name:
+        - helm
+        - kubectl
+        state: latest
+        update_homebrew: true
+      tags: homebrew
+
+    # - name: Install wuzz
+    #   ansible.builtin.shell: |
+    #     got install github.com/asciimoo/wuzz@latest
+    #   args:  
+    #     creates: ~/go/bin/wuzz
+    #   tags: wuzz
+        
+    # - name: Install btop
+    #   ansible.builtin.package:
+    #     name: btop 
+    #     state: present
+    #   become: true
+    #   tags: btop
+      
+    # - name: Install oh-my-bash
+    #   ansible.builtin.shell: bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
+    #   args:  
+    #     creates: ~/.oh-my-bash
+    #   tags: oh-my-bash
+
+    # - name: Install ble.sh
+    #   ansible.builtin.shell: |
+    #     curl -L https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz | tar xJf -
+    #     bash ble-nightly/ble.sh --install ~/.local/share
+    #     echo 'source ~/.local/share/blesh/ble.sh' >> ~/.bashrc
+    #     rm -rf ble-nightly
+    #   args:  
+    #     creates: ~/.local/share/blesh/ble.sh
+
     # - name: Install dasel
     #   ansible.builtin.shell: curl -sSLf "$(curl -sSLf https://api.github.com/repos/tomwright/dasel/releases/latest | grep browser_download_url | grep linux_amd64 | grep -v .gz | cut -d\" -f 4)" -L -o dasel && chmod +x dasel && mv ./dasel /usr/local/bin/dasel
     #   args:
     #     creates: /usr/local/bin/dasel
-    #   become: yes
+    #   become: true
     #   tags: dasel
 
     # - name: Install rust
@@ -315,7 +348,7 @@
     #   ansible.builtin.package:
     #     name: ripgrep
     #     state: present
-    #   become: yes
+    #   become: true
     #   tags: ripgrep
 
     # - name: Install neovim
@@ -453,7 +486,7 @@
     #       - protobuf-compiler
     #       - libprotobuf-dev
     #     state: present
-    #   become: yes
+    #   become: true
     #   tags: grpc
 
     # CLEAN UP
