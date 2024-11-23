@@ -208,6 +208,7 @@
           - python3-virtualenv
           - python3-setuptools
           - python3-devel
+          - python3-pip
         state: present
       become: true
       tags: python
@@ -218,6 +219,13 @@
         state: present
       become: true
       tags: bat
+
+    - name: Install ansible-navigator
+      ansible.builtin.pip:
+        name: ansible-navigator
+        state: present
+      #become: true
+      tags: ansible-navigator
 
     - name: Install the 'Development tools' package group
       ansible.builtin.dnf:
@@ -354,6 +362,7 @@
           
           # enable completion for the alias
           complete -F __start_kubectl k
+          EDITOR=vim
       tags: bash
 
     - name: do facts module to get latest information
