@@ -13,6 +13,7 @@
         - jq
         - yq
         - wl-clipboard
+        - ptyxis
         state: present
       become: true
       tags: clis
@@ -359,6 +360,7 @@
           alias k="kubectl"
           alias kctx='f() { [ "$1" ] && kubectl config use-context $1 || kubectl config current-context ; } ; f'
           alias kns='f() { [ "$1" ] && kubectl config set-context --current --namespace $1 || kubectl config view --minify | grep namespace | cut -d" " -f6 ; } ; f'
+          alias konfig='kubectl konfig'
           
           # enable completion for the alias
           complete -F __start_kubectl k
@@ -376,7 +378,8 @@
         kubectl krew install resource-capacity
         kubectl krew install view-secret
         kubectl krew install df-pv
-      tags: kubernetes
+        kubectl krew install konfig
+      tags: kubernetes,krew
 
     - name: Install starship
       ansible.builtin.shell: |
