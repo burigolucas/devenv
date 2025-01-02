@@ -18,6 +18,14 @@
       become: true
       tags: clis
 
+    - name: Install useful apps
+      ansible.builtin.package:
+        name:
+        - chromium
+        state: present
+      become: true
+      tags: apps
+
     - name: Install bash addons
       ansible.builtin.package:
         name:
