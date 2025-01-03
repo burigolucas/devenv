@@ -99,3 +99,19 @@ https://www.omglinux.com/change-sudo-timeout-linux/#:~:text=By%20default%2C%20a%
 
 disable gnome shell extensions:
 gsettings set org.gnome.shell disable-user-extensions true
+
+
+## VS Codium
+
+There is no official RPM package for VSCodium in Fedora. Reason for this is the difficulty to distribute Electron apps that are in line with the packaging guidelines. See:
+- https://docs.fedoraproject.org/en-US/packaging-guidelines/what-can-be-packaged/
+- https://discussion.fedoraproject.org/t/why-is-there-no-official-vs-codium-package/96211/11
+- https://discussion.fedoraproject.org/t/is-there-a-policy-for-packaging-electron-apps/130001/3
+
+Pre-built RPMs from the Upstream open-source repo are available at:
+- https://vscodium.com/#intro
+- https://github.com/VSCodium/vscodium
+
+A third-party RPM repo that distributes the RPMs are provided by Pavlo Rudyj. See:
+- https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/blob/master/updaterepos.sh
+- https://fedoraproject.org/wiki/User:Paulcarroty

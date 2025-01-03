@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 set +v
 
 sudo dnf update --refresh
