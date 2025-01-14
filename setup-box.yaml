@@ -236,12 +236,12 @@
       #become: true
       tags: ansible-navigator
 
-    - name: Install the 'Development tools' package group
-      ansible.builtin.dnf:
-        name: '@Development tools'
-        state: present
-      become: true
-      tags: dev-tools
+#    - name: Install the 'Development tools' package group
+#      ansible.builtin.dnf:
+#        name: '@Development tools'
+#        state: present
+#      become: true
+#      tags: dev-tools
 
     - name: Install dev tools
       ansible.builtin.package:
@@ -251,8 +251,9 @@
           - clang
           - gcc
           - gcc-c++
-          - ninja-build # required for flutter linux desktop
-          - gtk3-devel  # required for flutter linux desktop
+          - golang
+          #- ninja-build # required for flutter linux desktop
+          #- gtk3-devel  # required for flutter linux desktop
         state: present
       become: true
       tags: dev-tools
