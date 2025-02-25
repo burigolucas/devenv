@@ -131,8 +131,8 @@
       ansible.builtin.package:
         name:
           - podman-compose
-          - podman-docker
           - podman-remote
+          #- podman-docker
         state: present
       become: true
       tags: podman
@@ -142,6 +142,18 @@
         name: io.podman_desktop.PodmanDesktop
         state: present
       tags: podman
+
+    - name: Docker
+      ansible.builtin.package:
+        name:
+          - containerd
+          - docker-cli
+          - docker-buildx
+          - docker-compose
+          - docker-compose-switch
+        state: present
+      become: true
+      tags: docker
 
     - name: Virtual Machine Manager
       ansible.builtin.package:
