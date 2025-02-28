@@ -132,7 +132,7 @@
         name:
           - podman-compose
           - podman-remote
-          #- podman-docker
+          - podman-docker
         state: present
       become: true
       tags: podman
@@ -146,12 +146,11 @@
     - name: Docker
       ansible.builtin.package:
         name:
-          - containerd
           - docker-cli
           - docker-buildx
           - docker-compose
           - docker-compose-switch
-        state: present
+        state: absent
       become: true
       tags: docker
 
