@@ -1,5 +1,7 @@
 # devenv
 
+flameshot
+
 ## Setup for Flutter
 
 1. Finish Android Studio setup
@@ -86,7 +88,7 @@ codium config
 SHIFT+ALT+SPACE for key shortcut "Run selected text"
 
 ## ODO
-
+```bash
 curl -L https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/v3.16.1/odo-linux-amd64 -o odo
 curl -L https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/odo/v3.16.1/odo-linux-amd64.sha256 -o odo.sha256
 echo "$(<odo.sha256)  odo" | shasum -a 256 --check
@@ -99,7 +101,7 @@ https://www.omglinux.com/change-sudo-timeout-linux/#:~:text=By%20default%2C%20a%
 
 disable gnome shell extensions:
 gsettings set org.gnome.shell disable-user-extensions true
-
+```
 
 ## VS Codium
 
@@ -115,3 +117,25 @@ Pre-built RPMs from the Upstream open-source repo are available at:
 A third-party RPM repo that distributes the RPMs are provided by Pavlo Rudyj. See:
 - https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/blob/master/updaterepos.sh
 - https://fedoraproject.org/wiki/User:Paulcarroty
+
+## Other
+
+```bash
+brew install ollama
+```
+
+## Troubleshooting F41
+
+Issues with keyboard after upgrading kernel to 6.12
+```bash
+# 1. Finding out the dates of the last boots
+journalctl --list-boots
+# 2 Check in the logs of a particular boot to check the kernel version, for instance, the 13th most recent boot
+journalctl -b-12
+# 3. Identify the boot loader index for kernel verion of interest
+sudo grubby --info=ALL
+# 4. Set the default boot loader index, e.g., set to index 1
+sudo grubby --set-default-index=1
+# 5. Verify index of the default kernel
+sudo grubby --default-index
+```
