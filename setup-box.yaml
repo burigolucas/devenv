@@ -388,6 +388,7 @@
         block: |
           {% raw %}
           export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+          export JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::")
           source <(kubectl completion bash)
           source <(oc completion bash)
           source <(helm completion bash)
