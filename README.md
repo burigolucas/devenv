@@ -62,6 +62,10 @@ gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/or
 - Enable the custom-keybinding abobe
 gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/']"
 
+### See https://askubuntu.com/questions/464946/force-alt-tab-to-switch-only-on-current-workspace-in-gnome-shell
+gsettings set org.gnome.shell.window-switcher current-workspace-only true
+gsettings set org.gnome.shell.app-switcher current-workspace-only true
+
 ## Configure GNOME Terminal
 see Configuring gnome terminal programmatically https://ncona.com/2019/11/configuring-gnome-terminal-programmatically/
 
