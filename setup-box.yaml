@@ -24,6 +24,7 @@
       ansible.builtin.package:
         name:
         - chromium
+        - cockpit
         state: present
       become: true
       tags: apps
