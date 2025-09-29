@@ -25,6 +25,7 @@
         name:
         - chromium
         - cockpit
+        - chromedriver
         state: present
       become: true
       tags: apps
